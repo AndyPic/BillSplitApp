@@ -1,0 +1,393 @@
+* {
+    box-sizing: border-box;
+}
+
+/*Size*/
+
+:root {
+    /* SET UP MAX VARS FOR SCREEN SIZE (@MEDIA QUERY) */
+    --screen-pad: 2vh;
+    --radius: 6vh;
+    --height: calc(100vh - (2 * var(--screen-pad)));
+    /* Maintain aspect ratio */
+    --width: calc(var(--height) * 0.46);
+    --space: calc(0.0135 * var(--height));
+}
+
+/*Colour*/
+
+:root {
+    /* iPhone Colours */
+    --clr-iphone: rgb(60, 60, 60);
+    --clr-iphone-accent: rgb(120, 120, 120);
+    /* Brand Colours */
+    --clr-brand-blue: rgb(25, 100, 255);
+    --clr-brand-light-blue: rgb(205, 220, 255);
+    /* App Colours */
+    --clr-bars: rgb(80, 80, 80);
+    --clr-highlight: rgb(255, 200, 0);
+    --clr-light-grey: rgb(225, 225, 225);
+}
+
+/* misc vars */
+
+.screen {
+    --bar-height: calc(0.08 * (var(--height) - (2*var(--screen-pad))));
+    --bar-width: calc(var(--width) - (2*var(--screen-pad)));
+}
+
+.user-bar {
+    --user-width: calc(1.14 * var(--bar-height));
+}
+
+/* Go full screen for mobiles */
+
+@media screen and (max-width: 420px) {
+    :root {
+        --radius: 0;
+        --height: 100vh;
+        --width: 100vw;
+    }
+    .screen {
+        --bar-height: calc(0.08 * (var(--height) - (2*var(--screen-pad))));
+        --bar-width: var(--width);
+    }
+    .user-bar {
+        --user-width: calc(1.14 * var(--bar-height));
+    }
+}
+
+/* Scroll bar style */
+
+::-webkit-scrollbar {
+    width: calc(0.33 * var(--space));
+    height: calc(0.33 * var(--space));
+}
+
+::-webkit-scrollbar-track {
+    background: none;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--clr-iphone-accent);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--clr-bars);
+}
+
+/* General set-up */
+
+body {
+    margin: 0;
+    overflow: hidden;
+    position: relative;
+    background: var(--clr-light-grey);
+}
+
+button {
+    background: none;
+    outline: none;
+    border: none;
+}
+
+/* # iphone outline # */
+
+.iphone {
+    position: relative;
+    margin: 0;
+    height: var(--height);
+    width: var(--width);
+    padding: 0;
+    border-radius: var(--radius);
+    background: white;
+}
+
+@media screen and (min-width: 420px) {
+    .iphone {
+        position: relative;
+        margin: 2vh auto;
+        height: var(--height);
+        width: var(--width);
+        padding: var(--screen-pad);
+        border-radius: var(--radius);
+        background: white;
+        box-shadow: inset 0 0 0 calc(var(--screen-pad) + 0.08vh) var(--clr-iphone);
+    }
+    .notch {
+        position: absolute;
+        width: 50%;
+        height: 3%;
+        top: var(--screen-pad);
+        left: calc(0.25 * var(--width));
+        background: var(--clr-iphone);
+        border-bottom-left-radius: calc( 0.25 * var(--radius));
+        border-bottom-right-radius: calc( 0.25 * var(--radius));
+        z-index: 666;
+    }
+    .notch::before, .notch::after {
+        content: '';
+        height: calc( 0.5 * (0.03 * var(--height)));
+        width: calc( 0.5 * (0.03 * var(--height)));
+        position: absolute;
+        top: 0;
+    }
+    .notch::before {
+        background: radial-gradient(circle at bottom right, transparent 0, transparent 70%, var(--clr-iphone) 70%, var(--clr-iphone));
+        left: 100%;
+    }
+    .notch::after {
+        background: radial-gradient(circle at bottom left, transparent 0, transparent 70%, var(--clr-iphone) 70%, var(--clr-iphone));
+        right: 100%;
+    }
+    .notch .speaker {
+        position: absolute;
+        width: 25%;
+        height: 18%;
+        top: 20%;
+        left: 37.5%;
+        background: var(--clr-iphone-accent);
+        border-radius: calc( 0.05 * var(--radius));
+    }
+    .notch .camera {
+        position: absolute;
+        width: calc( 0.24 * (0.03 * var(--height)));
+        height: calc( 0.24 * (0.03 * var(--height)));
+        top: 17%;
+        right: 30%;
+        background: var(--clr-iphone-accent);
+        border-radius: 100%;
+    }
+}
+
+.screen {
+    position: relative;
+    border-radius: calc(var(--radius) - var(--screen-pad));
+    min-height: 100%;
+    width: 100%;
+}
+
+/* Top + Bottom Bars */
+
+.top-bar, .bottom-bar {
+    background: var(--clr-bars);
+    height: var(--bar-height);
+    width: var(--bar-width);
+}
+
+.top-bar {
+    position: absolute;
+    top: 0;
+    border-top-left-radius: calc(var(--radius) - var(--screen-pad));
+    border-top-right-radius: calc(var(--radius) - var(--screen-pad));
+}
+
+.top-bar button {
+    padding: 0;
+    position: absolute;
+    top: 25%;
+    font-size: calc(0.04 * (var(--height) - (2*var(--screen-pad))));
+    color: white;
+}
+
+.top-bar #back-arrow {
+    left: calc(0.04 * (var(--height) - (2*var(--screen-pad))));
+}
+
+.top-bar #menu {
+    right: calc(0.04 * (var(--height) - (2*var(--screen-pad))));
+}
+
+.bottom-bar {
+    position: absolute;
+    bottom: 0;
+    border-bottom-left-radius: calc(var(--radius) - var(--screen-pad));
+    border-bottom-right-radius: calc(var(--radius) - var(--screen-pad));
+}
+
+.bottom-bar button {
+    padding: 0;
+    margin: calc(0.3*var(--bar-height)) auto;
+    width: 100%;
+    text-align: center;
+    font-size: calc(0.4 * var(--bar-height));
+    font-weight: bold;
+    color: white;
+}
+
+/* Users */
+
+.user-bar {
+    position: absolute;
+    top: var(--bar-height);
+    height: calc(2 * var(--bar-height));
+    width: 100%;
+}
+
+#add-user-container, #user-container {
+    position: absolute;
+    height: calc(100% - var(--space));
+    margin-bottom: var(--space);
+}
+
+#add-user-container {
+    width: fit-content;
+}
+
+#user-container {
+    width: calc(100% - ((2 * var(--space)) + var(--user-width)));
+    left: calc(var(--space) + var(--user-width));
+    margin-right: calc(0.66 * var(--space));
+    white-space: nowrap;
+    overflow-x: scroll;
+}
+
+#user-container::-webkit-scrollbar {
+    width: 0;
+    height: 0px;
+}
+
+#add-user, .user {
+    display: inline-block;
+    position: relative;
+    /* May need to set right margin to -4px to fix in-line block */
+    margin: var(--space) 0 0 var(--space);
+    padding: 0;
+    width: var(--user-width);
+    height: var(--user-width);
+    border-radius: 50%;
+    background: black;
+    color: white;
+    font-size: calc(0.6 * var(--user-width));
+}
+
+.current-user {
+    box-shadow: 0 0 0 calc(0.33 * var(--space)) var(--clr-highlight);
+    transform-style: preserve-3d;
+}
+
+#user-container .user [class*="name-user-"] {
+    position: absolute;
+    top: calc(1.1 * var(--user-width));
+    left: 0;
+    width: 100%;
+    height: calc(0.3 * var(--user-width));
+    overflow: hidden;
+    font-size: calc(0.25 * var(--user-width));
+    font-family: sans-serif;
+    font-weight: 500;
+    color: black;
+}
+
+.current-user::after {
+    position: absolute;
+    transform: translateZ(-1px);
+    top: calc(0.5 * var(--user-width));
+    left: 0;
+    content: '';
+    width: var(--user-width);
+    height: calc(var(--user-width) - (0.66 * var(--space)));
+    background: var(--clr-highlight);
+    box-shadow: 0 0 0 calc(0.33 * var(--space)) var(--clr-highlight);
+}
+
+.bold-name {
+    font-weight: 750!important;
+}
+
+/* Total bar */
+
+.total-bar {
+    position: absolute;
+    bottom: var(--bar-height);
+    margin-top: var(--space);
+    height: calc(1.2 * var(--bar-height));
+    width: 100%;
+    background: var(--clr-light-grey);
+    border-top: 1px solid lightgrey;
+    font-size: calc(0.33 * var(--bar-height));
+    font-family: sans-serif;
+    font-weight: 600;
+}
+
+#user-total {
+    position: absolute;
+    top: var(--space);
+    right: calc(2*var(--space));
+}
+
+#total-tag {
+    position: absolute;
+    top: var(--space);
+    left: calc(2*var(--space));
+}
+
+#unassigned-total {
+    position: absolute;
+    bottom: var(--space);
+    right: calc(2*var(--space));
+}
+
+#unassigned-tag {
+    position: absolute;
+    bottom: var(--space);
+    left: calc(2*var(--space));
+}
+
+/* receipt items */
+
+.spacer {
+    width: 33%;
+    margin: calc(0.5*var(--space)) auto calc(1.5*var(--space)) auto;
+    border-bottom: 1px solid var(--clr-bars);
+}
+
+#item-container {
+    position: absolute;
+    top: calc(3*var(--bar-height));
+    width: calc(100% - (0.33 * var(--space)));
+    height: calc(100% - ((5.2*var(--bar-height)) + var(--space)));
+    margin-right: calc(0.33 * var(--space));
+    padding: 0 calc(0.33 * var(--space)) 0 var(--space);
+    overflow-y: scroll;
+}
+
+.item {
+    position: relative;
+    background: var(--clr-light-grey);
+    border: 1px solid lightgrey;
+    margin-bottom: var(--space);
+    padding: 0;
+    height: var(--bar-height);
+    width: 100%;
+}
+
+.item-name {
+    font-size: calc(0.33 * var(--bar-height));
+    max-width: calc(0.55 * var(--width));
+    white-space: nowrap;
+    overflow: hidden;
+    position: absolute;
+    left: var(--space);
+    top: calc(0.5 * var(--space));
+}
+
+.item-price {
+    font-size: calc(0.33 * var(--bar-height));
+    position: absolute;
+    right: var(--space);
+    top: calc(0.33 * var(--bar-height));
+}
+
+.item-user-container {
+    font-size: calc(0.275 * var(--bar-height));
+    position: absolute;
+    left: var(--space);
+    bottom: calc(0.5 * var(--space));
+}
+
+.item-user {
+    margin-right: calc(0.5*var(--space));
+    display: inline-block;
+    position: relative;
+}

@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" type="image/x-icon" href="imgs/billsplitterlogo.ico" />
+    <link rel="stylesheet" href="bill_splitter.css" type="text/css">
+    <link rel="stylesheet" href="user_colours.css" type="text/css">
+    <script src="https://kit.fontawesome.com/d43075deec.js" crossorigin="anonymous"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <title>Bill Splitter</title>
+    <script>
+
+        const receiptList = [
+            { name: 'Sprite', price: '1.99', type: 'drink', user: [] },
+            { name: 'Coffee', price: '2.49', type: 'drink', user: [] },
+            { name: 'Bottle Red Wine', price: '14.99', type: 'drink', user: [] },
+            { name: 'Avocado Salad', price: '8.99', type: 'main', user: [] },
+            { name: 'Chicken Burger', price: '7.99', type: 'main', user: [] },
+            { name: 'Lasagne', price: '9.99', type: 'main', user: [] },
+            { name: 'Ice Cream', price: '3.99', type: 'dessert', user: [] },
+            { name: 'Chocolate Cake', price: '3.99', type: 'dessert', user: [] },
+            { name: 'Cheesecake', price: '2.99', type: 'dessert', user: [] },
+        ]
+
+        const userList = ['Jeff', 'Mark', 'Sarah', 'Meg']
+
+        var currentUserTotal = 0
+        var unassignedTotal = 0
+
+        // Get user colours from 'user_colours.css' style sheet
+        var userColours
+        var styleSheets = document.styleSheets
+        for (var loop = 0; loop < styleSheets.length; loop++) {
+            if (styleSheets[loop].href.includes('user_colours.css')) {
+                userColours = styleSheets[loop].cssRules[0].style
+                break
+            }
+        }
+
+        // Default to 1st user as active user
+        var currentUser = 'user-0'
+        var currentUserNum = currentUser.substring(5,)
+
+        // Functions
+
+        /**
+         * 
+         */
+        var updateBoldNames = (type) => {
+
+            if (type == 'add') {
+                var updateBold = () => currentUserNames[loop].classList.add('bold-name')
+                var updateTotalTag = () => userTotalTagDiv.innerText = userList[currentUserNum] + "'s Total"
+            } else if (type == 'remove') {
+                var updateBold = () => currentUserNames[loop].classList.remove('bold-name')
+                var updateTotalTag = () => userTotalTagDiv.innerText = "User Total"
+            } else {
+                // Guard clause
+                return console.log('Invalid bold name type passed')
+            }
+
+            // Update bold names
+            var currentUserNames = document.querySelectorAll(".name-" + currentUser)
+            for (var loop = 0; loop < currentUserNames.length; loop++) {
+                updateBold()
+            }
+
+            // Update user total name at same time
+            var userTotalTagDiv = document.querySelector("#total-tag")
+            updateTotalTag()
+
+
+        }
+
+        /**
+         * 
+         */
+        var updateCurrentTotal = () => {
+            // Get total div
+            var currentUserTotalDiv = document.querySelector("#user-total")
+            // Reset total
+            currentUserTotal = 0
+            // Calculate total
+            for (i in receiptList) {
+                if (receiptList[i].user.includes(currentUserNum)) {
+                    currentUserTotal += parseFloat(receiptList[i].price / receiptList[i].user.length)
+                }
+            }
+
+            // Update unassigned too
+            updateUnassignedTotal()
+
+            currentUserTotalDiv.innerText = currentUserTotal.toFixed(2)
+        }
+
+        var updateUnassignedTotal = () => {
+            // Set starting unassigned total
+            var unassignedTotalDiv = document.querySelector("#unassigned-total")
+            unassignedTotal = 0
+            for (i in receiptList) {
+                if (receiptList[i].user == '') {
+                    unassignedTotal += parseFloat(receiptList[i].price)
+                }
+            }
+            unassignedTotalDiv.innerText = unassignedTotal.toFixed(2)
+        }
+
+        /**
+         * Set taped user to current user, if taped == current set to none
+         */
+        var selectUser = (self) => {
+            if (self == currentUser) {
+                document.querySelector("#" + currentUser).classList.remove('current-user')
+                updateBoldNames('remove')
+                currentUser = 'none'
+                currentUserNum = 'none'
+                updateCurrentTotal()
+            } else {
+                if (currentUser != 'none') {
+                    document.querySelector("#" + currentUser).classList.remove('current-user')
+                    updateBoldNames('remove')
+                }
+                currentUser = self
+                currentUserNum = currentUser.substring(5,)
+                document.querySelector("#" + currentUser).classList.add('current-user')
+                updateBoldNames('add')
+                updateCurrentTotal()
+            }
+        }
+
+        /**
+         * Add taped item to current user, if user == none, do nothing
+         */
+        var selectItem = (self) => {
+
+            // Guard clause
+            if (currentUser == 'none') {
+                console.log('No current user')
+                return
+            }
+
+            var currentItem = document.querySelector("#" + self)
+            var currentItemNum = self.substring(5,)
+            currentUserNum = currentUser.substring(5,)
+
+            var newItemUser = document.createElement('div')
+            newItemUser.classList.add('item-user')
+            newItemUser.classList.add("name-" + currentUser)
+            newItemUser.classList.add('bold-name')
+            newItemUser.innerText = userList[currentUserNum]
+
+            // Get item-user-container div for current item
+            for (var loop = 0; loop < currentItem.childNodes.length; loop++) {
+                if (currentItem.childNodes[loop].className.includes("item-user")) {
+                    itemUserContainerDiv = currentItem.childNodes[loop]
+                    break
+                }
+            }
+
+            
+
+            if (!receiptList[currentItemNum].user.includes(currentUserNum)) {
+                // Add user to item, if not already there
+                itemUserContainerDiv.appendChild(newItemUser)
+                updateItemColour(currentItem, currentItemNum, 1)
+                // Update item array & current total
+                receiptList[currentItemNum].user.push(currentUserNum)
+                updateCurrentTotal()
+                return
+            } else {
+                // Remove user from item if already there
+                var toRemoveIndex
+                
+                for(var loop = 0; loop < itemUserContainerDiv.children.length; loop++) {
+                    if (itemUserContainerDiv.children[loop].classList.contains('name-user-' + currentUserNum)) {
+                        toRemoveIndex = loop
+                        break
+                    }
+                }
+                // Update item display
+                itemUserContainerDiv.removeChild(itemUserContainerDiv.childNodes[toRemoveIndex])
+                updateItemColour(currentItem, currentItemNum)
+                // Update item array & current total
+
+                receiptList[currentItemNum].user.splice(receiptList[currentItemNum].user.indexOf(currentUserNum), 1)
+                updateCurrentTotal()
+                return
+            }
+        }
+
+        var updateItemColour = (currentItem, currentItemNum, action = 0) => {
+            currentUserNum = currentUser.substring(5,)
+            var colours = ''
+            var gradientString = 'linear-gradient(to right, )'
+
+            if (action == 1) {
+                // Add current user to colour
+                if (receiptList[currentItemNum].user.length == 0) {
+                    // Solid fill, if only user
+                    currentItem.style.background = 'rgba(' + userColours.getPropertyValue('--a' + currentUserNum) + ', 50%)'
+                    return
+                }
+
+                // Gradient fill for multiple users
+                for (loop in receiptList[currentItemNum].user) {
+                    colours += 'rgba(' + userColours.getPropertyValue('--a' + receiptList[currentItemNum].user[loop]) + ', 50%), '
+                }
+                colours += 'rgba(' + userColours.getPropertyValue('--a' + currentUserNum) + ', 50%)'
+
+                currentItem.style.background = 'linear-gradient(to right, ' + colours + ')'
+
+            } else {
+                // Remove current user from colour
+                if (receiptList[currentItemNum].user.length == 1 && receiptList[currentItemNum].user[0] == currentUserNum) {
+                    // was only user, remove background
+                    currentItem.style.background = ''
+                    return
+                }
+
+                // Gradient fill for multiple users
+                for (loop in receiptList[currentItemNum].user) {
+                    if (receiptList[currentItemNum].user[loop] == currentUserNum) {
+                        continue
+                    }
+                    colours += 'rgba(' + userColours.getPropertyValue('--a' + receiptList[currentItemNum].user[loop]) + ', 50%), '
+                }
+                colours = colours.slice(0, -2)
+
+                if (receiptList[currentItemNum].user.length == 2) {
+                    currentItem.style.background = colours
+                } else {
+                    currentItem.style.background = 'linear-gradient(to right, ' + colours + ')'
+                }
+
+
+            }
+
+            // Check users assigned to item
+
+
+
+        }
+
+        // JQ Load after DOM
+        $(function () {
+
+            updateUnassignedTotal()
+
+            // Get user-container
+            var userContainer = document.querySelector("#user-container")
+
+            // Make numUsers users 
+            for (loop in userList) {
+                var newUser = document.createElement('button')
+                newUser.classList.add('user')
+                newUser.classList.add('fa')
+                newUser.id = 'user-' + loop
+                newUser.setAttribute('onclick', 'selectUser(this.id)')
+                newUser.style.backgroundColor = 'rgb(' + userColours.getPropertyValue('--a' + loop) + ')'
+                newUser.innerText = ""
+
+                var newUserName = document.createElement('div')
+                newUserName.classList.add('name-user-' + loop)
+                newUserName.innerText = userList[loop]
+
+                newUser.appendChild(newUserName)
+
+                userContainer.appendChild(newUser)
+            }
+
+            // Get item-container
+            var itemContainer = document.querySelector("#item-container")
+
+            // if (sortingMethod == 'item type') { do this } else { something else }
+
+            var itemType = []
+            // Create array of item types
+            for (loop in receiptList) {
+                itemType.push(receiptList[loop].type)
+            }
+
+            // Drop duplicates
+            itemType = [...new Set(itemType)]
+
+            // Drop first item type (Don't need heading at the top of list)
+            itemType.shift()
+
+            // Make n headings for item types
+            for (loop in itemType) {
+                var newHeader = document.createElement('div')
+                newHeader.classList.add('spacer')
+                newHeader.id = itemType[loop]
+
+                itemContainer.appendChild(newHeader)
+            }
+
+            // Make items from receiptList
+            for (loop in receiptList) {
+                // Create item
+                var newItem = document.createElement('button')
+                newItem.classList.add('item')
+                newItem.id = 'item-' + loop
+                newItem.setAttribute('onclick', 'selectItem(this.id)')
+
+                // Create name div
+                var newItemName = document.createElement('div')
+                newItemName.classList.add('item-name')
+                newItemName.innerText = receiptList[loop].name
+
+                // Create price div
+                var newItemPrice = document.createElement('div')
+                newItemPrice.classList.add('item-price')
+                newItemPrice.innerText = receiptList[loop].price
+
+                var newItemUserContainer = document.createElement('div')
+                newItemUserContainer.classList.add('item-user-container')
+
+                // Append divs to item button
+                newItem.appendChild(newItemName)
+                newItem.appendChild(newItemPrice)
+                newItem.appendChild(newItemUserContainer)
+
+                // NOTE: Adds them in reverse order from list
+                if (itemType.includes(receiptList[loop].type)) {
+                    var targetHeader = document.querySelector("#" + receiptList[loop].type)
+                    itemContainer.insertBefore(newItem, targetHeader.nextSibling)
+                } else {
+                    // Add to start of item list
+                    itemContainer.prepend(newItem)
+                }
+
+            }
+
+            // Set up sarting user
+            document.querySelector("#" + currentUser).classList.add('current-user')
+            updateBoldNames('add')
+
+        });
+    </script>
+</head>
+
+<body>
+
+    <div class="logo">
+
+    </div>
+
+    <div class="iphone">
+        <div class="notch">
+            <div class="speaker"></div>
+            <div class="camera"></div>
+        </div>
+        <div class="screen">
+            <div class="top-bar">
+                <button class="fa" id="back-arrow"></button>
+                <button class="fa" id="menu"></button>
+            </div>
+
+            <div class="user-bar">
+                <div id="add-user-container">
+                    <button class="fa" id="add-user" onclick="console.log('add new user...')"></button>
+                </div>
+                <div id="user-container">
+                </div>
+
+            </div>
+
+            <div id="item-container">
+
+            </div>
+
+            <div class="total-bar">
+                <div id="total-tag">User Total</div>
+                <div id="user-total">0.00</div>
+                <div id="unassigned-tag">Unassigned</div>
+                <div id="unassigned-total">0.00</div>
+            </div>
+
+            <div class="bottom-bar">
+                <button id="confirm">CONFIRM</button>
+            </div>
+        </div>
+
+    </div>
+
+</body>
+
+</html>
